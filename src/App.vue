@@ -5,6 +5,7 @@ import { reactive, ref } from 'vue'
 import { TaskInterface, tasks } from './data/tasks'
 import Task from './components/Task.vue'
 import Filter from './components/Filter.vue'
+import Modal from './components/Modal.vue'
 import { computed } from 'vue'
 
 //Reactive for arrays and objects
@@ -66,6 +67,12 @@ const filteredTasks = computed(() => {
       return tasksReactive
   }
 })
+
+let modalIsOpen = ref<boolean>(false)
+
+const toggleModal = () => {
+  modalIsOpen.value = !modalIsOpen.value
+}
 </script>
 
 <template>
@@ -74,6 +81,7 @@ const filteredTasks = computed(() => {
       <div class="header-side">
         <h1>My first vue Task manager</h1>
       </div>
+      <button class="btn secondary" @click="toggleModal">Add task</button>
     </div>
   </div>
   <main>
@@ -86,18 +94,7 @@ const filteredTasks = computed(() => {
         :task="task"
       />
     </div>
-
-    <div class="add-task">
-      <h3>Add a new task</h3>
-      <input v-model="newTask.name" type="text" name="title" placeholder="Enter a title..." /><br />
-      <textarea
-        v-model="newTask.description"
-        name="description"
-        rows="4"
-        placeholder="Enter a description..."
-      /><br />
-      <button @click="addTask()" class="btn gray">Add Task</button>
-    </div>
+    <Modal @toggleModal="toggleModal" v-if="modalIsOpen" />
   </main>
 </template>
 
