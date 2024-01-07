@@ -1,53 +1,102 @@
 <!-- @format -->
 
 <script setup lang="ts">
-import { tasks } from "./data/tasks";
+import { reactive, ref } from 'vue'
+import { TaskInterface, tasks } from './data/tasks'
+import Task from './components/Task.vue'
+import Filter from './components/Filter.vue'
+import { computed } from 'vue'
+
+//Reactive for arrays and objects
+const tasksReactive = reactive<TaskInterface[]>(tasks)
+
+//Declaring a simple variable to hold the data from our inputs using let
+let newTask: TaskInterface = {
+  name: '',
+  description: '',
+  completed: false,
+  id: 0
+}
+
+//Add a new task to the list
+const addTask = () => {
+  if (newTask.name == '' || newTask.description == '') {
+    alert('Fill the task inputs to create a task')
+    return
+  }
+  Object.assign(newTask, { id: tasksReactive.length + 1 })
+  tasksReactive.push(newTask)
+}
+
+const toggleCompleted = (taskId: number) => {
+  console.log('toggling')
+  const taskToToggle = tasksReactive.find((task) => task.id === taskId)!
+  console.log('task to toggle', taskToToggle)
+  Object.assign(taskToToggle, { completed: !taskToToggle.completed })
+}
+
+let filterByType = ref<string>('')
+const filterBy = (type: string): void => {
+  console.log('filtering', type)
+
+  switch (type) {
+    case 'todo':
+      filterByType.value = 'todo'
+      break
+    case 'done':
+      const newTasks2 = tasksReactive.filter((task) => task.completed)
+      filterByType.value = 'done'
+      break
+
+    default:
+      filterByType.value = ''
+      return
+  }
+}
+
+const filteredTasks = computed(() => {
+  switch (filterByType.value) {
+    case 'todo':
+      return tasksReactive.filter((task) => !task.completed)
+
+    case 'done':
+      return tasksReactive.filter((task) => task.completed)
+
+    default:
+      return tasksReactive
+  }
+})
 </script>
 
 <template>
-  <main class="container">
+  <div class="container">
     <div class="header">
       <div class="header-side">
-        <h1>Tasks Manager</h1>
+        <h1>My first vue Task manager</h1>
       </div>
     </div>
-
-    <div class="filters">
-      <div>
-        <p>Filter by state</p>
-        <div class="badges">
-          <div class="badge">To-Do</div>
-          <div class="badge">Done</div>
-          <span class="clear"> x clear </span>
-        </div>
-      </div>
-    </div>
-
+  </div>
+  <main>
+    <Filter @filterBy="filterBy" :filterByType="filterByType" />
     <div class="tasks">
-      <div class="task">
-        <h3>Website design</h3>
-        <p>Define the style guide, branding and create the webdesign on Figma.</p>
-        <div class="task-check">
-          <input type="checkbox" checked />
-          <label> Done </label>
-        </div>
-      </div>
-
-      <div class="task">
-        <h3>Website development</h3>
-        <p>Develop the portfolio website using Vue JS.</p>
-        <div class="task-check">
-          <input type="checkbox" />
-          <label> To-Do </label>
-        </div>
-      </div>
+      <Task
+        @toggleCompleted="toggleCompleted"
+        v-for="(task, index) in filteredTasks"
+        :key="index"
+        :task="task"
+      />
     </div>
 
     <div class="add-task">
       <h3>Add a new task</h3>
-      <input type="text" name="title" placeholder="Enter a title..." /><br />
-      <textarea name="description" rows="4" placeholder="Enter a description..." /><br />
-      <button class="btn gray">Add Task</button>
+      <input v-model="newTask.name" type="text" name="title" placeholder="Enter a title..." /><br />
+      <textarea
+        v-model="newTask.description"
+        name="description"
+        rows="4"
+        placeholder="Enter a description..."
+      /><br />
+      <button @click="addTask()" class="btn gray">Add Task</button>
     </div>
   </main>
 </template>
@@ -77,37 +126,6 @@ import { tasks } from "./data/tasks";
   }
 }
 
-.filters {
-  display: flex;
-  flex-direction: column;
-  margin: 40px 0;
-
-  p {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 21px;
-    letter-spacing: 0em;
-    text-align: left;
-  }
-
-  .badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 14px 0;
-    align-items: center;
-  }
-
-  .clear {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 16px;
-    letter-spacing: 0em;
-    text-align: left;
-    cursor: pointer;
-  }
-}
-
 .tasks {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -115,80 +133,6 @@ import { tasks } from "./data/tasks";
 
   @media (max-width: 768px) {
     grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-.task {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--white-color);
-  color: var(--black-color);
-  padding: 20px;
-  border-radius: 12px;
-  position: relative;
-
-  h3 {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 21px;
-    letter-spacing: 0em;
-    text-align: left;
-  }
-
-  p {
-    margin-top: 24px;
-    margin-bottom: 12px;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 16px;
-    letter-spacing: 0em;
-    text-align: left;
-  }
-
-  .task-check {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-
-    label {
-      font-size: 13px;
-      font-weight: 400;
-      line-height: 16px;
-      letter-spacing: 0em;
-      text-align: left;
-      margin-left: 5px;
-      cursor: pointer;
-    }
-
-    input {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 100%;
-      border: 0.77px solid #aeaeb2;
-      appearance: none;
-      cursor: pointer;
-
-      &:checked {
-        background-color: #0a7aff;
-        border-color: #0a7aff;
-
-        &::before {
-          content: "";
-          display: block;
-          width: 4.5px;
-          height: 9px;
-          border: solid white;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
-        }
-      }
-    }
   }
 }
 
