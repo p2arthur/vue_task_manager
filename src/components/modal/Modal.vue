@@ -7,10 +7,10 @@ import ModalCloseButton from './ModalCloseButton.vue'
 
 <template>
   <div class="modal-wrapper" aria-modal="true" role="dialog" tabindex="-1">
-    <div class="inner"><ModalCloseButton @click="$emit('toggleModal')" /></div>
+    <div class="inner"><ModalCloseButton @click="$emit('toggleModal')" /> <slot></slot></div>
   </div>
 </template>
-<style>
+<style lang="scss">
 .modal-wrapper {
   position: fixed;
   left: 0;
@@ -21,7 +21,7 @@ import ModalCloseButton from './ModalCloseButton.vue'
   background: rgba(0, 0, 0, 0.2);
   display: grid;
   place-items: center;
-  color: var(--black-color);
+  color: #000;
 
   .inner {
     background-color: white;
@@ -45,7 +45,7 @@ import ModalCloseButton from './ModalCloseButton.vue'
       top: 15px;
       right: 15px;
       cursor: pointer;
-      background-color: var(--white-color);
+      background-color: #fff;
     }
 
     .form {

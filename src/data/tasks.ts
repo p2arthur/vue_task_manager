@@ -5,7 +5,7 @@ export interface TaskInterface {
   id: number
 }
 
-const tasks: TaskInterface[] = [
+const tasksList: TaskInterface[] = [
   {
     name: 'Website design',
     description: 'Define the style guide, branding and create the webdesign on Figma.',
@@ -50,4 +50,4 @@ const tasks: TaskInterface[] = [
   }
 ]
 
-export { tasks }
+export { tasksList }

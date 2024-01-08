@@ -2,71 +2,15 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { TaskInterface, tasks } from './data/tasks'
+import { TaskInterface, tasksList } from './data/tasks'
 import Task from './components/Task.vue'
 import Filter from './components/Filter.vue'
-import Modal from './components/Modal.vue'
+import Modal from './components/modal/Modal.vue'
+import AddTaskModal from './components/modal/AddTaskModal.vue'
 import { computed } from 'vue'
+import { useTasksStore } from './stores/tasks.store'
 
-//Reactive for arrays and objects
-const tasksReactive = reactive<TaskInterface[]>(tasks)
-
-//Declaring a simple variable to hold the data from our inputs using let
-let newTask: TaskInterface = {
-  name: '',
-  description: '',
-  completed: false,
-  id: 0
-}
-
-//Add a new task to the list
-const addTask = () => {
-  if (newTask.name == '' || newTask.description == '') {
-    alert('Fill the task inputs to create a task')
-    return
-  }
-  Object.assign(newTask, { id: tasksReactive.length + 1 })
-  tasksReactive.push(newTask)
-}
-
-const toggleCompleted = (taskId: number) => {
-  console.log('toggling')
-  const taskToToggle = tasksReactive.find((task) => task.id === taskId)!
-  console.log('task to toggle', taskToToggle)
-  Object.assign(taskToToggle, { completed: !taskToToggle.completed })
-}
-
-let filterByType = ref<string>('')
-const filterBy = (type: string): void => {
-  console.log('filtering', type)
-
-  switch (type) {
-    case 'todo':
-      filterByType.value = 'todo'
-      break
-    case 'done':
-      const newTasks2 = tasksReactive.filter((task) => task.completed)
-      filterByType.value = 'done'
-      break
-
-    default:
-      filterByType.value = ''
-      return
-  }
-}
-
-const filteredTasks = computed(() => {
-  switch (filterByType.value) {
-    case 'todo':
-      return tasksReactive.filter((task) => !task.completed)
-
-    case 'done':
-      return tasksReactive.filter((task) => task.completed)
-
-    default:
-      return tasksReactive
-  }
-})
+const store = useTasksStore()
 
 let modalIsOpen = ref<boolean>(false)
 
@@ -85,16 +29,13 @@ const toggleModal = () => {
     </div>
   </div>
   <main>
-    <Filter @filterBy="filterBy" :filterByType="filterByType" />
+    <Filter />
     <div class="tasks">
-      <Task
-        @toggleCompleted="toggleCompleted"
-        v-for="(task, index) in filteredTasks"
-        :key="index"
-        :task="task"
-      />
+      <Task v-for="(task, index) in store.filteredTasks" :key="index" :task="task" />
     </div>
-    <Modal @toggleModal="toggleModal" v-if="modalIsOpen" />
+    <Modal @toggleModal="toggleModal" v-if="modalIsOpen">
+      <AddTaskModal @addTask="store.addTask"
+    /></Modal>
   </main>
 </template>
 
@@ -130,23 +71,6 @@ const toggleModal = () => {
 
   @media (max-width: 768px) {
     grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-.add-task {
-  margin-top: 60px;
-
-  input,
-  textarea {
-    width: 360px;
-    max-width: 100%;
-    margin-top: 12px;
-    padding: 5px;
-  }
-
-  button {
-    width: 360px;
-    margin-top: 12px;
   }
 }
 </style>

@@ -1,9 +1,9 @@
 <!-- @format -->
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useTasksStore } from '../stores/tasks.store'
 
-const props = defineProps(['filterByType'])
+const store = useTasksStore()
 </script>
 
 <template>
@@ -12,20 +12,20 @@ const props = defineProps(['filterByType'])
       <p>Filter by state</p>
       <div class="badges">
         <div
-          @click="$emit('filterBy', 'todo')"
-          :class="{ selected: filterByType == 'todo' }"
+          @click="store.setFilter('todo')"
+          :class="{ selected: store.filterByType == 'todo' }"
           class="badge"
         >
           To-Do
         </div>
         <div
-          @click="$emit('filterBy', 'done')"
-          :class="{ selected: filterByType === 'done' }"
+          @click="store.setFilter('done')"
+          :class="{ selected: store.filterByType === 'done' }"
           class="badge"
         >
           Done
         </div>
-        <span @click="$emit('filterBy', '')" v-if="filterByType" class="clear"> x clear </span>
+        <span @click="store.setFilter('')" v-if="store.filterByType" class="clear"> x clear </span>
       </div>
     </div>
   </div>
